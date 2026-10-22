@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kathy's Application</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#2E9E4F" />
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Kathy's App" />
+<style>
+  :root{
+    --paper:#E3F4E6; --card:#FAFFFA; --ink:#1F2A22; --muted:#5E7D66; --line:#B7DAC0;
+    --accent:#2E9E4F; --accent-contrast:#F4FFF6; --accent-soft:#C6EBD0; --danger:#8C3A2B; --radius:10px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  html{
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(ellipse 620px 480px at 8% -6%, rgba(210,255,222,.85), transparent 60%),
+      radial-gradient(ellipse 700px 560px at 108% 8%, rgba(46,158,79,.16), transparent 62%),
+      radial-gradient(ellipse 640px 520px at -6% 62%, rgba(46,158,79,.14), transparent 60%),
+      radial-gradient(ellipse 760px 620px at 96% 100%, rgba(210,255,222,.75), transparent 58%),
+      linear-gradient(165deg,#EEFAF0 0%,#E3F4E6 45%,#D2EBD8 100%);
+    background-attachment:fixed; background-size:cover; min-height:100%;
+  }
+  body{
+    position:relative; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px; line-height:1.45; -webkit-tap-highlight-color:transparent; min-height:100vh;
+  }
+  /* All-over music notes, tiled and fixed behind the content */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cg fill='%232E9E4F' fill-opacity='0.17'%3E%3Cg transform='translate(34,60) rotate(-12)'%3E%3Cellipse cx='0' cy='0' rx='9' ry='6.5' transform='rotate(-20)'/%3E%3Crect x='6' y='-34' width='3' height='34'/%3E%3Cpath d='M9 -34 C 20 -28 24 -20 20 -10 C 19 -18 15 -22 9 -23 Z'/%3E%3C/g%3E%3Cg transform='translate(150,48) rotate(10) scale(.9)'%3E%3Cellipse cx='0' cy='0' rx='9' ry='6.5' transform='rotate(-20)'/%3E%3Cellipse cx='26' cy='-4' rx='9' ry='6.5' transform='rotate(-20 26 -4)'/%3E%3Crect x='6' y='-34' width='3' height='34'/%3E%3Crect x='32' y='-38' width='3' height='34'/%3E%3Cpath d='M6 -34 L35 -38 L35 -29 L6 -25 Z'/%3E%3C/g%3E%3Cg transform='translate(90,150) rotate(14) scale(1.1)'%3E%3Cellipse cx='0' cy='0' rx='9' ry='6.5' transform='rotate(-20)'/%3E%3Crect x='6' y='-34' width='3' height='34'/%3E%3C/g%3E%3Cg transform='translate(200,170) rotate(-8) scale(.8)'%3E%3Cellipse cx='0' cy='0' rx='9' ry='6.5' transform='rotate(-20)'/%3E%3Crect x='6' y='-34' width='3' height='34'/%3E%3Cpath d='M9 -34 C 20 -28 24 -20 20 -10 C 19 -18 15 -22 9 -23 Z'/%3E%3C/g%3E%3Cg transform='translate(30,205) rotate(8) scale(.85)'%3E%3Cellipse cx='0' cy='0' rx='9' ry='6.5' transform='rotate(-20)'/%3E%3Cellipse cx='26' cy='-4' rx='9' ry='6.5' transform='rotate(-20 26 -4)'/%3E%3Crect x='6' y='-34' width='3' height='34'/%3E%3Crect x='32' y='-38' width='3' height='34'/%3E%3Cpath d='M6 -34 L35 -38 L35 -29 L6 -25 Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-repeat:repeat; background-size:240px 240px;
+  }
+  .page{ max-width:480px; margin:0 auto; padding:22px 18px 40px; position:relative; }
+  .page-head h1{ font-family:Georgia,"Iowan Old Style","Palatino Linotype","Times New Roman",serif; font-size:23px; font-weight:600; margin:0 0 6px; }
+  .page-head .sub{ margin:0; color:var(--muted); font-size:13.5px; max-width:34ch; }
+
+  #banner{ margin-top:14px; }
+  .banner{ background:#F4E3DC; border:1px solid var(--danger); color:var(--danger); border-radius:8px; padding:10px 12px; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .banner button{ background:none; border:none; color:var(--danger); font-size:13px; text-decoration:underline; cursor:pointer; padding:0; flex-shrink:0; }
+
+  .tab-bar{ display:flex; gap:4px; margin:18px 0 6px; background:var(--card); border-radius:999px; padding:4px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .tab-btn{ flex:1; border:none; background:none; padding:9px 6px; border-radius:999px; font:13.5px -apple-system,sans-serif; font-weight:600; color:var(--muted); cursor:pointer; }
+  .tab-btn.active{ background:var(--accent); color:var(--accent-contrast); }
+
+  .section-headrow{ display:flex; justify-content:space-between; align-items:center; margin:22px 0 8px; }
+  .section-headrow .section-title{ margin:0; }
+  .section-title{ font-family:Georgia,"Iowan Old Style","Palatino Linotype","Times New Roman",serif; font-size:15px; font-weight:600; color:var(--muted); margin:26px 0 8px; }
+  .section-title:first-of-type{ margin-top:20px; }
+  .empty-state{ padding:18px 2px 22px; color:var(--muted); font-size:14px; }
+
+  .avatar{ display:inline-flex; align-items:center; justify-content:center; border-radius:50%; overflow:hidden; flex-shrink:0; background:var(--accent-soft); border:2px solid var(--accent); color:var(--accent); font-family:Georgia,serif; font-weight:600; }
+  .avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .avatar-label{ cursor:pointer; display:inline-block; }
+
+  .person-list,.group-list{ list-style:none; margin:0; padding:0; }
+  .person-row,.group-row{ border-bottom:1px solid var(--line); }
+  .person-row:first-child,.group-row:first-child{ border-top:1px solid var(--line); }
+  .person-head,.group-head{ width:100%; display:flex; align-items:center; gap:10px; background:none; border:none; text-align:left; padding:12px 2px; cursor:pointer; font:inherit; color:inherit; }
+  .group-head{ padding:15px 2px; }
+  .person-name{ flex:1; font-size:15px; font-weight:500; }
+  .person-status{ font-size:12px; color:var(--danger); flex-shrink:0; }
+  .group-name{ flex:1; font-family:Georgia,"Iowan Old Style",serif; font-size:17px; font-weight:500; }
+  .group-count{ font-size:12.5px; color:var(--muted); flex-shrink:0; text-align:right; }
+  .group-count .complete-tag{ color:var(--accent); font-weight:600; }
+  .chevron{ display:inline-block; color:var(--muted); font-size:15px; transition:transform .18s ease; flex-shrink:0; }
+  .chevron.open{ transform:rotate(90deg); }
+
+  .person-panel,.group-panel{ background:var(--card); border-radius:var(--radius); padding:16px; margin:0 2px 16px; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .panel-manage{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .link-btn{ background:none; border:none; cursor:pointer; padding:2px 0; font:13px -apple-system,sans-serif; color:var(--accent); }
+  .link-btn.danger{ color:var(--danger); }
+  .link-btn:hover{ text-decoration:underline; }
+  .link-btn:disabled{ opacity:.45; cursor:not-allowed; text-decoration:none; }
+
+  .field-label{ display:block; font-size:12.5px; color:var(--muted); margin:12px 0 6px; }
+  .field-label:first-of-type{ margin-top:4px; }
+  textarea,input[type="text"],input[type="time"],select{ width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 10px; font:14px -apple-system,sans-serif; color:var(--ink); background:#fff; }
+  textarea{ resize:vertical; font-family:inherit; }
+  textarea:focus,input:focus,select:focus{ outline:2px solid var(--accent); outline-offset:1px; }
+
+  .primary-btn{ margin-top:10px; background:var(--accent); color:var(--accent-contrast); border:none; border-radius:var(--radius); padding:10px 16px; font:14px -apple-system,sans-serif; font-weight:600; cursor:pointer; }
+  .primary-btn:disabled{ background:var(--line); color:var(--muted); cursor:not-allowed; }
+
+  .photo-edit{ display:flex; align-items:center; gap:14px; margin:4px 0 14px; }
+  .photo-actions{ display:flex; flex-direction:column; gap:4px; align-items:flex-start; }
+  .person-edit-form{ display:flex; flex-direction:column; }
+  .person-edit-form input{ margin-bottom:8px; }
+  .person-edit-form button{ align-self:flex-start; background:var(--accent); color:var(--accent-contrast); border:none; border-radius:8px; padding:8px 14px; font:13.5px sans-serif; cursor:pointer; }
+  .link-preview{ font-size:13px; color:var(--muted); word-break:break-all; margin:0; }
+
+  .contacts{ margin-top:6px; }
+  .contact-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--line); }
+  .contact-row:last-child{ border-bottom:none; }
+  .contact-name{ flex:1; font-size:14px; }
+  .contact-row.sent .contact-name{ text-decoration:line-through; color:var(--muted); }
+  .sent-check{ flex-shrink:0; width:18px; height:18px; accent-color:var(--accent); cursor:pointer; }
+  .pill-btn{ display:inline-block; background:var(--accent); color:var(--accent-contrast); font-size:12.5px; padding:6px 12px; border-radius:999px; text-decoration:none; flex-shrink:0; border:none; cursor:pointer; font-family:-apple-system,sans-serif; }
+  .pill-btn.disabled{ background:var(--line); color:var(--muted); cursor:not-allowed; }
+  .icon-btn{ background:none; border:none; cursor:pointer; color:var(--muted); font-size:12.5px; padding:4px; flex-shrink:0; }
+  .icon-btn:hover{ color:var(--danger); }
+
+  .progress-label{ font-size:12.5px; color:var(--muted); margin:0 0 6px; display:flex; justify-content:space-between; gap:8px; }
+  .progress-label .badge-complete{ color:var(--accent); font-weight:600; }
+  .progress-track{ width:100%; height:7px; background:var(--line); border-radius:999px; overflow:hidden; margin:0 0 12px; }
+  .progress-fill{ height:100%; background:var(--accent); border-radius:999px; transition:width .2s ease; }
+  .checklist-actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; align-items:center; }
+  .checklist-actions .primary-btn{ margin-top:0; }
+  .checklist-actions .link-btn{ padding:10px 4px; }
+  .hint-text{ font-size:13px; color:var(--muted); margin:14px 0 0; }
+  .member-picker{ margin-top:4px; }
+  .add-member-form{ display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap; }
+  .add-member-form select{ flex:1; min-width:0; }
+  .add-member-form button{ background:var(--accent); color:var(--accent-contrast); border:none; border-radius:8px; padding:9px 14px; font:13.5px sans-serif; font-weight:600; cursor:pointer; flex-shrink:0; }
+
+  .add-card{ margin-top:16px; padding:16px; background:var(--card); border-radius:var(--radius); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .add-card h3{ font-family:Georgia,"Iowan Old Style",serif; font-size:15px; font-weight:600; margin:0 0 10px; }
+  .add-card form{ display:flex; flex-direction:column; gap:8px; }
+  .add-card > form > button{ align-self:flex-start; background:var(--accent); color:var(--accent-contrast); border:none; border-radius:8px; padding:9px 16px; font:13.5px sans-serif; font-weight:600; cursor:pointer; }
+
+  .rename-form{ display:flex; gap:8px; flex:1; margin-right:10px; }
+  .rename-form input{ flex:1; }
+  .rename-form button{ background:var(--accent); color:var(--accent-contrast); border:none; border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; flex-shrink:0; }
+  .page-foot{ margin-top:26px; }
+
+  .month-nav{ display:flex; align-items:center; justify-content:center; gap:18px; margin:12px 0 14px; }
+  .month-nav-btn{ background:var(--accent-soft); color:var(--accent); border:none; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .month-nav-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .month-label{ font-family:Georgia,serif; font-size:17px; font-weight:600; min-width:150px; text-align:center; }
+  .calendar-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin:4px 2px 6px; }
+  .calendar-weekday{ font-size:10.5px; font-weight:700; color:var(--muted); text-align:center; padding-bottom:2px; letter-spacing:.02em; }
+  .calendar-cell{ aspect-ratio:1/1; display:flex; flex-direction:column; align-items:center; justify-content:center; border-radius:8px; background:#fff; border:1px solid var(--line); cursor:pointer; position:relative; font:inherit; color:inherit; padding:2px; min-width:0; }
+  .calendar-cell.empty{ visibility:hidden; pointer-events:none; border:none; background:none; }
+  .calendar-cell .cell-day{ font-size:13px; font-weight:600; }
+  .calendar-cell.is-today{ border-color:var(--accent); border-width:2px; background:var(--accent-soft); }
+  .calendar-cell.is-selected{ background:var(--accent); border-color:var(--accent); }
+  .calendar-cell.is-selected .cell-day{ color:var(--accent-contrast); }
+  .calendar-cell.is-selected.is-today{ border-color:var(--accent-contrast); }
+  .cell-dot{ width:5px; height:5px; border-radius:50%; background:var(--accent); position:absolute; bottom:5px; }
+  .calendar-cell.is-selected .cell-dot{ background:var(--accent-contrast); }
+  .cell-alarm{ font-size:8px; position:absolute; top:3px; right:4px; line-height:1; }
+  .cell-todo{ font-size:9px; font-weight:700; position:absolute; top:3px; left:4px; line-height:1; color:var(--accent); }
+  .calendar-cell.is-selected .cell-todo{ color:var(--accent-contrast); }
+  .calendar-legend{ display:flex; gap:14px; font-size:11.5px; color:var(--muted); margin:6px 2px 4px; flex-wrap:wrap; }
+  .legend-dot{ display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:5px; vertical-align:middle; }
+  .legend-today{ display:inline-block; width:9px; height:9px; border-radius:2px; border:2px solid var(--accent); margin-right:5px; vertical-align:middle; }
+  .legend-todo-mark{ color:var(--accent); font-weight:700; margin-right:5px; }
+  .calendar-editor{ margin-top:14px; }
+  .calendar-day-placeholder{ display:none; }
+
+  .flag-btn{ background:none; border:none; cursor:pointer; font-size:15px; padding:4px; flex-shrink:0; opacity:.32; filter:grayscale(1); }
+  .flag-btn.active{ opacity:1; filter:none; }
+  .contact-row.urgent{ border-left:3px solid var(--danger); padding-left:7px; margin-left:-10px; }
+
+  @media (min-width:900px){
+    .page{ max-width:1160px; padding:48px 64px 80px; }
+    .page-head h1{ font-size:30px; }
+    .page-head .sub{ max-width:60ch; font-size:15px; }
+    .tab-bar{ max-width:440px; margin:22px auto 8px; }
+    .section-title{ font-size:17px; }
+    textarea,input[type="text"],input[type="time"],select{ font-size:15px; padding:11px 12px; }
+    .add-card,.person-panel,.group-panel{ padding:22px; }
+    .primary-btn{ padding:12px 20px; font-size:15px; }
+    .messages-columns{ display:grid; grid-template-columns:1fr 1fr; gap:0 64px; align-items:start; }
+    .calendar-columns{ display:grid; grid-template-columns:minmax(340px,480px) 1fr; gap:0 48px; align-items:start; }
+    .calendar-picker{ max-width:480px; }
+    .calendar-editor{ margin-top:0; }
+    .calendar-day-placeholder{ display:flex; align-items:center; justify-content:center; text-align:center; min-height:260px; color:var(--muted); font-size:15px; max-width:40ch; margin:0 auto; background:var(--card); border-radius:var(--radius); box-shadow:0 1px 3px rgba(0,0,0,.1); padding:32px; }
+  }
+  @media (hover:hover) and (pointer:fine){
+    .tab-btn:not(.active):hover{ background:var(--accent-soft); color:var(--accent); }
+    .person-head:hover,.group-head:hover{ background:var(--accent-soft); border-radius:8px; }
+    .calendar-cell:not(.is-selected):hover{ border-color:var(--accent); }
+    .contact-row:hover{ background:rgba(46,158,79,.06); border-radius:6px; }
+    .primary-btn:not(:disabled):hover,.pill-btn:not(.disabled):hover{ filter:brightness(1.07); }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-head">
+    <h1>Kathy's Application</h1>
+    <p class="sub">&ldquo;Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.&rdquo;<br>Joshua 1:9</p>
+  </header>
+  <div id="banner"></div>
+  <div id="app"></div>
+</div>
+
+<script>
+(function(){
+
+  // Data lives on this device (localStorage). No account, no sign-in.
+  var store = {
+    get: function(key){ try{ var v = localStorage.getItem(key); return v === null ? null : JSON.parse(v); }catch(e){ return null; } },
+    set: function(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); return true; }catch(e){ return false; } }
+  };
+
+  var K_PEOPLE = 'kathy-people-v1', K_GROUPS = 'kathy-groups-v1', K_CAL = 'kathy-calendar-v1';
+  var MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var WEEKDAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  var peopleState = { people: [] };
+  var groupsState = { groups: [] };
+  var calendarState = { entries: {} };
+
+  var today = new Date();
+  var CURRENT_YEAR = today.getFullYear(), CURRENT_MONTH = today.getMonth(), CURRENT_DATE = today.getDate();
+
+  var uiState = {
+    activeTab:'messages',
+    expandedPersonId:null, editingPersonId:null, pendingDeletePersonId:null,
+    expandedGroupId:null, renamingGroupId:null, pendingDeleteGroupId:null,
+    pendingClearAll:false, copiedGroupId:null, quickCopied:false,
+    calYear:CURRENT_YEAR, calMonth:CURRENT_MONTH, calExpandedDate:null, pendingDeleteTodoId:null
+  };
+  var timers = {};
+  var quickMessageDraft = '';
+  var alarmTimers = {};
+
+  function genId(prefix){ return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function escapeHtml(str){
+    return String(str || '').replace(/[&<>"']/g, function(c){ return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; });
+  }
+  function setTimer(name, fn, ms){ if(timers[name]) clearTimeout(timers[name]); timers[name] = setTimeout(fn, ms); }
+  function clearTimer(name){ if(timers[name]){ clearTimeout(timers[name]); timers[name] = null; } }
+
+  function normalizeLink(input){
+    input = (input || '').trim();
+    if(!input) return '';
+    var m = input.match(/^https?:\/\/(www\.)?(m\.me|messenger\.com\/t|facebook\.com|fb\.com)\/([^/?#]+)/i);
+    if(m) return 'https://m.me/' + m[3];
+    if(/^https?:\/\//i.test(input)) return input;
+    input = input.replace(/^@/, '').replace(/^m\.me\//i, '').replace(/^messenger\.com\/t\//i, '');
+    return 'https://m.me/' + input;
+  }
+
+  function openMessengerHref(link){
+    if(!link) return;
+    if(/Android/i.test(navigator.userAgent || '')){
+      try{
+        var url = new URL(link);
+        var target = url.hostname + url.pathname + url.search;
+        window.location.href = 'intent://' + target + '#Intent;package=com.facebook.orca;scheme=' +
+          url.protocol.replace(':','') + ';S.browser_fallback_url=' + encodeURIComponent(link) + ';end';
+        return;
+      }catch(e){}
+    }
+    window.open(link, '_blank', 'noopener');
+  }
+
+  function copyToClipboard(text){
+    return new Promise(function(resolve, reject){
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(resolve).catch(reject); return;
+      }
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta); resolve();
+      }catch(err){ reject(err); }
+    });
+  }
+
+  function showBanner(message){
+    document.getElementById('banner').innerHTML = '<div class="banner"><span>' + escapeHtml(message) +
+      '</span><button data-action="dismiss-banner">Dismiss</button></div>';
+  }
+  function clearBanner(){ document.getElementById('banner').innerHTML = ''; }
+
+  function loadAll(){
+    var p = store.get(K_PEOPLE);
+    if(p && Array.isArray(p.people)) peopleState = p;
+    var g = store.get(K_GROUPS);
+    if(g && Array.isArray(g.groups)){
+      g.groups.forEach(function(x){
+        if(!Array.isArray(x.memberIds)) x.memberIds = [];
+        if(typeof x.message !== 'string') x.message = '';
+        if(!Array.isArray(x.sentIds)) x.sentIds = [];
+        if(typeof x.completed !== 'boolean') x.completed = false;
+      });
+      groupsState = g;
+    }
+    var c = store.get(K_CAL);
+    if(c && c.entries && typeof c.entries === 'object'){
+      Object.keys(c.entries).forEach(function(k){
+        var e = c.entries[k];
+        if(typeof e.note !== 'string') e.note = '';
+        if(typeof e.alarm !== 'string') e.alarm = '';
+        if(!Array.isArray(e.todos)) e.todos = [];
+        e.todos.forEach(function(t){
+          if(typeof t.done !== 'boolean') t.done = false;
+          if(typeof t.urgent !== 'boolean') t.urgent = false;
+        });
+      });
+      calendarState = c;
+    }
+  }
+  function saveFail(){ showBanner("Couldn't save your changes. Storage may be full or blocked."); }
+  function savePeople(){ if(!store.set(K_PEOPLE, peopleState)) saveFail(); }
+  function saveGroups(){ if(!store.set(K_GROUPS, groupsState)) saveFail(); }
+  function saveCalendar(){ if(!store.set(K_CAL, calendarState)) saveFail(); }
+
+  function findPerson(id){ return peopleState.people.filter(function(p){ return p.id === id; })[0] || null; }
+  function findGroup(id){ return groupsState.groups.filter(function(g){ return g.id === id; })[0] || null; }
+  function findCalTodo(dKey, todoId){
+    var entry = calendarState.entries[dKey];
+    if(!entry) return null;
+    for(var i=0;i<entry.todos.length;i++){ if(entry.todos[i].id === todoId) return { entry:entry, todo:entry.todos[i] }; }
+    return null;
+  }
+  function ensureCalEntry(dKey){
+    if(!calendarState.entries[dKey]) calendarState.entries[dKey] = { note:'', alarm:'', todos:[] };
+    return calendarState.entries[dKey];
+  }
+
+  function loadAndResizeImage(file){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        var img = new Image();
+        img.onload = function(){
+          var size = 240, canvas = document.createElement('canvas');
+          canvas.width = size; canvas.height = size;
+          var s = Math.min(img.width, img.height);
+          canvas.getContext('2d').drawImage(img, (img.width - s)/2, (img.height - s)/2, s, s, 0, 0, size, size);
+          resolve(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.onerror = function(){ reject(new Error('bad image')); };
+        img.src = e.target.result;
+      };
+      reader.onerror = function(){ reject(new Error('bad file')); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderAvatar(person, sizePx){
+    var style = 'width:'+sizePx+'px;height:'+sizePx+'px;font-size:'+Math.round(sizePx*0.42)+'px;';
+    if(person.photo) return '<span class="avatar" style="'+style+'"><img src="'+person.photo+'" alt="" /></span>';
+    var initial = (person.name || '?').trim().charAt(0).toUpperCase() || '?';
+    return '<span class="avatar" style="'+style+'">'+escapeHtml(initial)+'</span>';
+  }
+
+  function dateKey(y, m, d){ return y + '-' + pad2(m + 1) + '-' + pad2(d); }
+  function daysInMonth(y, m){ return new Date(y, m + 1, 0).getDate(); }
+  function getCalEntry(key){ return calendarState.entries[key] || { note:'', alarm:'', todos:[] }; }
+  function formatDateHeading(y, m, d){ return MONTH_NAMES[m] + ' ' + d + ', ' + y; }
+
+  // Best-effort alarm: fires only while the app is open.
+  function scheduleTodaysAlarms(){
+    Object.keys(alarmTimers).forEach(function(k){ clearTimeout(alarmTimers[k]); });
+    alarmTimers = {};
+    var todayKey = dateKey(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DATE);
+    var entry = calendarState.entries[todayKey];
+    if(!entry || !entry.alarm) return;
+    var parts = entry.alarm.split(':');
+    var target = new Date();
+    target.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+    var ms = target.getTime() - Date.now();
+    if(ms <= 0) return;
+    alarmTimers[todayKey] = setTimeout(function(){
+      var body = entry.note && entry.note.trim() ? entry.note : 'You set an alarm for today.';
+      if('Notification' in window && Notification.permission === 'granted'){
+        try{ new Notification('Reminder', { body: body }); }catch(e){}
+      } else { showBanner('Reminder: ' + body); }
+    }, ms);
+  }
+
+  function render(){
+    var root = document.getElementById('app');
+    var html = '<nav class="tab-bar">';
+    html += '<button type="button" class="tab-btn'+(uiState.activeTab==='messages'?' active':'')+'" data-action="switch-tab" data-tab="messages">Messages</button>';
+    html += '<button type="button" class="tab-btn'+(uiState.activeTab==='calendar'?' active':'')+'" data-action="switch-tab" data-tab="calendar">Calendar</button>';
+    html += '</nav>';
+    html += uiState.activeTab === 'calendar' ? renderCalendarTab() : renderMessagesTab();
+    root.innerHTML = html;
+    if(uiState.editingPersonId){
+      var i1 = document.getElementById('pname-'+uiState.editingPersonId);
+      if(i1) i1.focus();
+    }
+    if(uiState.renamingGroupId){
+      var i2 = root.querySelector('.rename-form input');
+      if(i2){ i2.focus(); i2.select(); }
+    }
+  }
+
+  function renderMessagesTab(){
+    var html = '';
+    html += '<div class="add-card"><h3>Quick message</h3>';
+    html += '<p class="hint-text">For a one-off note outside your saved groups. Copying it clears the box automatically.</p>';
+    html += '<textarea id="quickMessage" rows="3" data-action="edit-quick-message" placeholder="Type a message to copy and send">'+escapeHtml(quickMessageDraft)+'</textarea>';
+    html += '<button type="button" class="primary-btn" data-action="quick-copy" '+(quickMessageDraft.trim()?'':'disabled')+'>'+(uiState.quickCopied?'Copied':'Copy')+'</button></div>';
+
+    html += '<div class="messages-columns"><div class="messages-col"><h2 class="section-title">Groups</h2>';
+    if(groupsState.groups.length === 0){
+      html += '<p class="empty-state">No groups yet. Add one below to get started.</p>';
+    } else {
+      html += '<ul class="group-list">';
+      groupsState.groups.forEach(function(g){
+        var expanded = uiState.expandedGroupId === g.id;
+        var count = g.memberIds.length, sentCount = g.sentIds.length;
+        html += '<li class="group-row"><button type="button" class="group-head" data-action="toggle-group" data-id="'+g.id+'">';
+        html += '<span class="chevron'+(expanded?' open':'')+'">&#8250;</span>';
+        html += '<span class="group-name">'+escapeHtml(g.name)+'</span>';
+        html += '<span class="group-count">'+count+' '+(count===1?'person':'people')+
+          (g.completed ? '<br><span class="complete-tag">Marked complete</span>' : (count>0 ? '<br>'+sentCount+'/'+count+' sent' : ''))+'</span></button>';
+
+        if(expanded){
+          html += '<div class="group-panel"><div class="panel-manage">';
+          if(uiState.renamingGroupId === g.id){
+            html += '<form class="rename-form" data-action="confirm-rename" data-id="'+g.id+'"><input type="text" name="rename" value="'+escapeHtml(g.name)+'" /><button type="submit">Save</button></form>';
+          } else {
+            html += '<button type="button" class="link-btn" data-action="start-rename" data-id="'+g.id+'">Rename</button>';
+          }
+          html += '<button type="button" class="link-btn danger" data-action="request-delete-group" data-id="'+g.id+'">'+(uiState.pendingDeleteGroupId===g.id?'Tap again to delete':'Delete group')+'</button></div>';
+
+          html += '<label class="field-label" for="msg-'+g.id+'">Message</label>';
+          html += '<textarea id="msg-'+g.id+'" rows="4" data-action="edit-message" data-id="'+g.id+'" placeholder="Type the message you want to send this group">'+escapeHtml(g.message)+'</textarea>';
+          html += '<button type="button" class="primary-btn" data-action="copy-message" data-id="'+g.id+'" '+((g.message||'').trim()?'':'disabled')+'>'+(uiState.copiedGroupId===g.id?'Copied':'Copy message')+'</button>';
+
+          html += '<div class="contacts"><p class="field-label">People ('+count+')</p>';
+          if(count > 0){
+            var pct = Math.round((sentCount / count) * 100);
+            html += '<p class="progress-label"><span>'+sentCount+' of '+count+' sent</span>'+(g.completed?'<span class="badge-complete">Complete</span>':'')+'</p>';
+            html += '<div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+          }
+          g.memberIds.forEach(function(pid){
+            var person = findPerson(pid);
+            if(!person) return;
+            var isSent = g.sentIds.indexOf(pid) !== -1;
+            html += '<div class="contact-row'+(isSent?' sent':'')+'">';
+            html += '<input type="checkbox" class="sent-check" data-action="toggle-sent" data-id="'+g.id+'" data-person="'+pid+'" '+(isSent?'checked':'')+' aria-label="Mark '+escapeHtml(person.name)+' as sent" />';
+            html += renderAvatar(person, 28) + '<span class="contact-name">'+escapeHtml(person.name)+'</span>';
+            html += person.link ? '<button type="button" class="pill-btn" data-action="open-chat" data-link="'+escapeHtml(person.link)+'">Open chat</button>' : '<span class="pill-btn disabled">No link yet</span>';
+            html += '<button type="button" class="icon-btn" data-action="remove-member" data-id="'+g.id+'" data-person="'+pid+'">Remove</button></div>';
+          });
+          html += '</div>';
+
+          if(count > 0){
+            html += '<div class="checklist-actions"><button type="button" class="primary-btn" data-action="finish-group" data-id="'+g.id+'" '+(sentCount===0?'disabled':'')+'>'+(g.completed?'Marked complete':'Finish')+'</button>';
+            html += '<button type="button" class="link-btn danger" data-action="reset-checklist" data-id="'+g.id+'" '+((sentCount===0&&!g.completed)?'disabled':'')+'>Reset checklist</button></div>';
+          }
+
+          var available = peopleState.people.filter(function(p){ return g.memberIds.indexOf(p.id) === -1; });
+          html += '<div class="member-picker">';
+          if(peopleState.people.length === 0){
+            html += '<p class="hint-text">Add people in the People section below, then come back to add them here.</p>';
+          } else if(available.length === 0){
+            html += '<p class="hint-text">Everyone you have added is already in this group.</p>';
+          } else {
+            html += '<form class="add-member-form" data-action="add-member" data-id="'+g.id+'"><select name="personId">';
+            available.forEach(function(p){ html += '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'; });
+            html += '</select><button type="submit">Add to group</button></form>';
+          }
+          html += '</div></div>';
+        }
+        html += '</li>';
+      });
+      html += '</ul>';
+    }
+    html += '<div class="add-card"><h3>Add a group</h3><form data-action="add-group"><input type="text" id="newGroupName" placeholder="e.g. Book club" required /><button type="submit">Add group</button></form></div>';
+    html += '</div>';
+
+    html += '<div class="messages-col"><h2 class="section-title">People</h2>';
+    if(peopleState.people.length === 0){
+      html += '<p class="empty-state">No people yet. Add someone below to get started.</p>';
+    } else {
+      html += '<ul class="person-list">';
+      peopleState.people.forEach(function(p){
+        var expanded = uiState.expandedPersonId === p.id;
+        html += '<li class="person-row"><button type="button" class="person-head" data-action="toggle-person" data-id="'+p.id+'">';
+        html += '<span class="chevron'+(expanded?' open':'')+'">&#8250;</span>' + renderAvatar(p, 32);
+        html += '<span class="person-name">'+escapeHtml(p.name)+'</span>';
+        if(!p.link) html += '<span class="person-status">No link yet</span>';
+        html += '</button>';
+        if(expanded){
+          html += '<div class="person-panel"><div class="panel-manage">';
+          html += uiState.editingPersonId !== p.id ? '<button type="button" class="link-btn" data-action="start-edit-person" data-id="'+p.id+'">Edit details</button>' : '<span></span>';
+          html += '<button type="button" class="link-btn danger" data-action="request-delete-person" data-id="'+p.id+'">'+(uiState.pendingDeletePersonId===p.id?'Tap again to delete':'Delete person')+'</button></div>';
+          html += '<div class="photo-edit"><label for="photo-input-'+p.id+'" class="avatar-label">'+renderAvatar(p, 64)+'</label>';
+          html += '<input type="file" accept="image/*" id="photo-input-'+p.id+'" data-action="photo-input" data-id="'+p.id+'" style="display:none" />';
+          html += '<div class="photo-actions"><label for="photo-input-'+p.id+'" class="link-btn">'+(p.photo?'Change photo':'Add photo')+'</label>';
+          if(p.photo) html += '<button type="button" class="link-btn danger" data-action="remove-photo" data-id="'+p.id+'">Remove photo</button>';
+          html += '</div></div>';
+          if(uiState.editingPersonId === p.id){
+            html += '<form class="person-edit-form" data-action="save-person-details" data-id="'+p.id+'">';
+            html += '<label class="field-label" for="pname-'+p.id+'">Name</label><input type="text" id="pname-'+p.id+'" name="name" value="'+escapeHtml(p.name)+'" />';
+            html += '<label class="field-label" for="plink-'+p.id+'">Messenger link</label><input type="text" id="plink-'+p.id+'" name="link" value="'+escapeHtml(p.link||'')+'" placeholder="Paste their profile or m.me link" />';
+            html += '<button type="submit">Save</button></form>';
+          } else if(p.link){
+            html += '<p class="field-label">Messenger link</p><p class="link-preview">'+escapeHtml(p.link)+'</p>';
+          }
+          html += '</div>';
+        }
+        html += '</li>';
+      });
+      html += '</ul>';
+    }
+    html += '<div class="add-card"><h3>Add a person</h3><form data-action="add-person">';
+    html += '<input type="text" id="newPersonName" placeholder="Name" required /><input type="text" id="newPersonLink" placeholder="Messenger link (optional for now)" />';
+    html += '<button type="submit">Add person</button></form></div></div></div>';
+
+    html += '<footer class="page-foot"><button type="button" class="link-btn danger" data-action="request-clear-all">'+
+      (uiState.pendingClearAll?'Tap again to erase everything':'Clear all data')+'</button></footer>';
+    return html;
+  }
+
+  function renderCalendarTab(){
+    var html = '<div class="section-headrow"><h2 class="section-title">Calendar</h2><button type="button" class="link-btn" data-action="exit-calendar">Exit</button></div>';
+    var year = uiState.calYear, monthIdx = uiState.calMonth;
+    var atEarliest = (year === CURRENT_YEAR && monthIdx === CURRENT_MONTH);
+
+    html += '<div class="calendar-columns"><div class="calendar-picker"><div class="month-nav">';
+    html += '<button type="button" class="month-nav-btn" data-action="cal-prev-month" '+(atEarliest?'disabled':'')+' aria-label="Previous month">&lsaquo;</button>';
+    html += '<span class="month-label">'+MONTH_NAMES[monthIdx]+' '+year+'</span>';
+    html += '<button type="button" class="month-nav-btn" data-action="cal-next-month" aria-label="Next month">&rsaquo;</button></div>';
+    html += '<div class="calendar-legend"><span><span class="legend-today"></span>Today</span><span><span class="legend-dot"></span>Has a note</span><span><span class="legend-todo-mark">&#10003;</span>Has to-dos</span></div>';
+
+    html += '<div class="calendar-grid">';
+    WEEKDAY_NAMES.forEach(function(wd){ html += '<div class="calendar-weekday">'+wd+'</div>'; });
+    var firstWeekday = new Date(year, monthIdx, 1).getDay(), numDays = daysInMonth(year, monthIdx);
+    for(var i=0;i<firstWeekday;i++) html += '<div class="calendar-cell empty"></div>';
+    for(var d=1; d<=numDays; d++){
+      var dKey = dateKey(year, monthIdx, d), dEntry = getCalEntry(dKey);
+      var hasNote = !!(dEntry.note && dEntry.note.trim());
+      var hasOpenTodo = dEntry.todos.some(function(t){ return !t.done; });
+      var isToday = (year===CURRENT_YEAR && monthIdx===CURRENT_MONTH && d===CURRENT_DATE);
+      var isSelected = uiState.calExpandedDate === dKey;
+      html += '<button type="button" class="calendar-cell'+(isToday?' is-today':'')+(isSelected?' is-selected':'')+'" data-action="cal-toggle-date" data-date="'+dKey+'">';
+      if(hasOpenTodo) html += '<span class="cell-todo">&#10003;</span>';
+      if(dEntry.alarm) html += '<span class="cell-alarm">\u23F0</span>';
+      html += '<span class="cell-day">'+d+'</span>';
+      if(hasNote) html += '<span class="cell-dot"></span>';
+      html += '</button>';
+    }
+    html += '</div></div>';
+
+    var editorHtml = '', showEditor = false;
+    if(uiState.calExpandedDate){
+      var key = uiState.calExpandedDate, kp = key.split('-');
+      if(parseInt(kp[0],10) === year && (parseInt(kp[1],10)-1) === monthIdx){
+        showEditor = true;
+        var entry = getCalEntry(key), todos = entry.todos;
+        var todoDone = todos.filter(function(t){ return t.done; }).length;
+        editorHtml += '<div class="calendar-editor group-panel"><div class="panel-manage">';
+        editorHtml += '<h3 style="margin:0;font-family:Georgia,serif;font-size:15px;">'+formatDateHeading(year, monthIdx, parseInt(kp[2],10))+'</h3>';
+        editorHtml += '<button type="button" class="link-btn" data-action="cal-back-to-days">&larr; Back</button></div>';
+        editorHtml += '<p class="field-label" style="margin-top:4px;">To-Do'+(todos.length?' &mdash; '+todoDone+'/'+todos.length+' done':'')+'</p><div class="contacts">';
+        if(!todos.length){
+          editorHtml += '<p class="hint-text" style="margin:0 0 4px;">No to-dos for this date yet.</p>';
+        } else {
+          todos.forEach(function(t){
+            editorHtml += '<div class="contact-row'+(t.done?' sent':'')+(t.urgent?' urgent':'')+'">';
+            editorHtml += '<input type="checkbox" class="sent-check" data-action="toggle-todo-done" data-date="'+key+'" data-todo="'+t.id+'" '+(t.done?'checked':'')+' aria-label="Mark to-do done" />';
+            editorHtml += '<span class="contact-name">'+escapeHtml(t.text)+'</span>';
+            editorHtml += '<button type="button" class="flag-btn'+(t.urgent?' active':'')+'" data-action="toggle-todo-urgent" data-date="'+key+'" data-todo="'+t.id+'" title="Mark urgent" aria-label="Toggle urgent">\uD83D\uDEA9</button>';
+            editorHtml += '<button type="button" class="icon-btn" data-action="request-delete-todo" data-date="'+key+'" data-todo="'+t.id+'">'+(uiState.pendingDeleteTodoId===t.id?'Tap again':'Remove')+'</button></div>';
+          });
+        }
+        editorHtml += '</div><form class="add-member-form" data-action="add-todo" data-date="'+key+'" style="margin:10px 0 18px;">';
+        editorHtml += '<input type="text" name="todoText" placeholder="Add a to-do" style="flex:1 1 100%;" required />';
+        editorHtml += '<label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);"><input type="checkbox" name="todoUrgent" style="width:auto;" /> \uD83D\uDEA9 Urgent</label><button type="submit">Add</button></form>';
+        editorHtml += '<label class="field-label" for="cal-note-'+key+'">Notes</label>';
+        editorHtml += '<textarea id="cal-note-'+key+'" rows="4" data-action="edit-calendar-note" data-date="'+key+'" placeholder="Add a note for this date">'+escapeHtml(entry.note)+'</textarea>';
+        editorHtml += '<label class="field-label" for="cal-alarm-'+key+'">Alarm</label>';
+        editorHtml += '<input type="time" id="cal-alarm-'+key+'" data-action="edit-calendar-alarm" data-date="'+key+'" value="'+escapeHtml(entry.alarm)+'" />';
+        editorHtml += '<p class="hint-text">The alarm fires as a notification while this app is open on the day of the reminder. It can\'t wake a closed app.</p>';
+        editorHtml += '<button type="button" class="link-btn danger" style="margin-top:10px;" data-action="clear-calendar-entry" data-date="'+key+'">Clear notes &amp; alarm</button></div>';
+      }
+    }
+    html += '<div class="calendar-detail">';
+    html += showEditor ? editorHtml : '<div class="calendar-day-placeholder"><p>Select a date to see its to-dos, notes, and alarm.</p></div>';
+    html += '</div></div>';
+    return html;
+  }
+
+  function collapsePersonTransient(exceptId){
+    if(uiState.editingPersonId && uiState.editingPersonId !== exceptId) uiState.editingPersonId = null;
+    if(uiState.pendingDeletePersonId && uiState.pendingDeletePersonId !== exceptId){ uiState.pendingDeletePersonId = null; clearTimer('delPerson'); }
+  }
+  function collapseGroupTransient(exceptId){
+    if(uiState.renamingGroupId && uiState.renamingGroupId !== exceptId) uiState.renamingGroupId = null;
+    if(uiState.pendingDeleteGroupId && uiState.pendingDeleteGroupId !== exceptId){ uiState.pendingDeleteGroupId = null; clearTimer('delGroup'); }
+  }
+
+  var app = document.getElementById('app');
+
+  app.addEventListener('click', function(e){
+    var el = e.target.closest('[data-action]');
+    if(!el) return;
+    var action = el.dataset.action, id = el.dataset.id;
+
+    if(action === 'switch-tab'){ uiState.activeTab = el.dataset.tab; render(); }
+    else if(action === 'toggle-person'){
+      uiState.expandedPersonId = (uiState.expandedPersonId === id) ? null : id;
+      collapsePersonTransient(null); render();
+    }
+    else if(action === 'start-edit-person'){ uiState.editingPersonId = id; render(); }
+    else if(action === 'remove-photo'){
+      var p0 = findPerson(id);
+      if(p0){ p0.photo = null; savePeople(); render(); }
+    }
+    else if(action === 'request-delete-person'){
+      if(uiState.pendingDeletePersonId === id){
+        peopleState.people = peopleState.people.filter(function(p){ return p.id !== id; });
+        groupsState.groups.forEach(function(g){
+          g.memberIds = g.memberIds.filter(function(x){ return x !== id; });
+          g.sentIds = g.sentIds.filter(function(x){ return x !== id; });
+        });
+        if(uiState.expandedPersonId === id) uiState.expandedPersonId = null;
+        uiState.editingPersonId = null; uiState.pendingDeletePersonId = null; clearTimer('delPerson');
+        savePeople(); saveGroups(); render();
+      } else {
+        uiState.pendingDeletePersonId = id;
+        setTimer('delPerson', function(){ uiState.pendingDeletePersonId = null; render(); }, 3000);
+        render();
+      }
+    }
+    else if(action === 'toggle-group'){
+      uiState.expandedGroupId = (uiState.expandedGroupId === id) ? null : id;
+      collapseGroupTransient(null); render();
+    }
+    else if(action === 'start-rename'){ uiState.renamingGroupId = id; render(); }
+    else if(action === 'request-delete-group'){
+      if(uiState.pendingDeleteGroupId === id){
+        groupsState.groups = groupsState.groups.filter(function(g){ return g.id !== id; });
+        if(uiState.expandedGroupId === id) uiState.expandedGroupId = null;
+        uiState.pendingDeleteGroupId = null; clearTimer('delGroup');
+        saveGroups(); render();
+      } else {
+        uiState.pendingDeleteGroupId = id;
+        setTimer('delGroup', function(){ uiState.pendingDeleteGroupId = null; render(); }, 3000);
+        render();
+      }
+    }
+    else if(action === 'copy-message'){
+      var g = findGroup(id);
+      if(!g || !g.message.trim()) return;
+      copyToClipboard(g.message).then(function(){
+        uiState.copiedGroupId = id; render();
+        setTimer('copied', function(){ uiState.copiedGroupId = null; render(); }, 1500);
+      }).catch(function(){ showBanner("Couldn't copy automatically. Long-press the message box to copy it manually."); });
+    }
+    else if(action === 'quick-copy'){
+      var qText = quickMessageDraft;
+      if(!qText.trim()) return;
+      copyToClipboard(qText).then(function(){
+        quickMessageDraft = ''; uiState.quickCopied = true; render();
+        setTimer('quick', function(){ uiState.quickCopied = false; render(); }, 1500);
+      }).catch(function(){ showBanner("Couldn't copy automatically. Long-press the message box to copy it manually."); });
+    }
+    else if(action === 'open-chat'){ openMessengerHref(el.dataset.link); }
+    else if(action === 'remove-member'){
+      var g2 = findGroup(id);
+      if(!g2) return;
+      var pid = el.dataset.person;
+      g2.memberIds = g2.memberIds.filter(function(x){ return x !== pid; });
+      g2.sentIds = g2.sentIds.filter(function(x){ return x !== pid; });
+      saveGroups(); render();
+    }
+    else if(action === 'finish-group'){
+      var g3 = findGroup(id);
+      if(g3){ g3.completed = true; saveGroups(); render(); }
+    }
+    else if(action === 'reset-checklist'){
+      var g4 = findGroup(id);
+      if(g4){ g4.sentIds = []; g4.completed = false; saveGroups(); render(); }
+    }
+    else if(action === 'request-clear-all'){
+      if(uiState.pendingClearAll){
+        peopleState = { people: [] }; groupsState = { groups: [] }; calendarState = { entries: {} };
+        uiState.expandedPersonId = null; uiState.editingPersonId = null; uiState.pendingDeletePersonId = null;
+        uiState.expandedGroupId = null; uiState.renamingGroupId = null; uiState.pendingDeleteGroupId = null;
+        uiState.pendingClearAll = false; uiState.copiedGroupId = null;
+        uiState.calMonth = CURRENT_MONTH; uiState.calYear = CURRENT_YEAR; uiState.calExpandedDate = null; uiState.pendingDeleteTodoId = null;
+        clearTimer('clearAll');
+        savePeople(); saveGroups(); saveCalendar(); render();
+      } else {
+        uiState.pendingClearAll = true;
+        setTimer('clearAll', function(){ uiState.pendingClearAll = false; render(); }, 3000);
+        render();
+      }
+    }
+    else if(action === 'dismiss-banner'){ clearBanner(); }
+    else if(action === 'exit-calendar'){ uiState.activeTab = 'messages'; uiState.calExpandedDate = null; render(); }
+    else if(action === 'cal-prev-month'){
+      if(!(uiState.calYear === CURRENT_YEAR && uiState.calMonth === CURRENT_MONTH)){
+        uiState.calMonth -= 1;
+        if(uiState.calMonth < 0){ uiState.calMonth = 11; uiState.calYear -= 1; }
+        uiState.calExpandedDate = null; render();
+      }
+    }
+    else if(action === 'cal-next-month'){
+      uiState.calMonth += 1;
+      if(uiState.calMonth > 11){ uiState.calMonth = 0; uiState.calYear += 1; }
+      uiState.calExpandedDate = null; render();
+    }
+    else if(action === 'cal-toggle-date'){
+      uiState.calExpandedDate = (uiState.calExpandedDate === el.dataset.date) ? null : el.dataset.date;
+      render();
+    }
+    else if(action === 'cal-back-to-days'){ uiState.calExpandedDate = null; render(); }
+    else if(action === 'clear-calendar-entry'){
+      var ckey = el.dataset.date, ent = calendarState.entries[ckey];
+      if(ent){
+        ent.note = ''; ent.alarm = '';
+        if(!ent.todos.length) delete calendarState.entries[ckey];
+      }
+      saveCalendar(); scheduleTodaysAlarms(); render();
+    }
+    else if(action === 'toggle-todo-urgent'){
+      var rU = findCalTodo(el.dataset.date, el.dataset.todo);
+      if(rU){ rU.todo.urgent = !rU.todo.urgent; saveCalendar(); render(); }
+    }
+    else if(action === 'request-delete-todo'){
+      var tid = el.dataset.todo, dk = el.dataset.date;
+      if(uiState.pendingDeleteTodoId === tid){
+        var eD = calendarState.entries[dk];
+        if(eD) eD.todos = eD.todos.filter(function(t){ return t.id !== tid; });
+        uiState.pendingDeleteTodoId = null; clearTimer('delTodo');
+        saveCalendar(); render();
+      } else {
+        uiState.pendingDeleteTodoId = tid;
+        setTimer('delTodo', function(){ uiState.pendingDeleteTodoId = null; render(); }, 3000);
+        render();
+      }
+    }
+  });
+
+  app.addEventListener('submit', function(e){
+    var form = e.target.closest('[data-action]');
+    if(!form) return;
+    e.preventDefault();
+    var action = form.dataset.action, id = form.dataset.id;
+
+    if(action === 'add-person'){
+      var name = (document.getElementById('newPersonName').value || '').trim();
+      if(!name) return;
+      var np = { id: genId('p'), name: name, link: normalizeLink(document.getElementById('newPersonLink').value), photo: null };
+      peopleState.people.push(np);
+      uiState.expandedPersonId = np.id;
+      savePeople(); render();
+    }
+    else if(action === 'save-person-details'){
+      var p = findPerson(id);
+      if(p){
+        var nn = (form.elements.name.value || '').trim();
+        if(nn) p.name = nn;
+        p.link = normalizeLink(form.elements.link.value);
+      }
+      uiState.editingPersonId = null; savePeople(); render();
+    }
+    else if(action === 'add-group'){
+      var gName = (document.getElementById('newGroupName').value || '').trim();
+      if(!gName) return;
+      var ng = { id: genId('grp'), name: gName, message: '', memberIds: [], sentIds: [], completed: false };
+      groupsState.groups.push(ng);
+      uiState.expandedGroupId = ng.id;
+      saveGroups(); render();
+    }
+    else if(action === 'confirm-rename'){
+      var g = findGroup(id), nm = (form.elements.rename.value || '').trim();
+      if(g && nm) g.name = nm;
+      uiState.renamingGroupId = null; saveGroups(); render();
+    }
+    else if(action === 'add-member'){
+      var g2 = findGroup(id);
+      if(!g2) return;
+      var personId = form.elements.personId.value;
+      if(personId && g2.memberIds.indexOf(personId) === -1){ g2.memberIds.push(personId); saveGroups(); render(); }
+    }
+    else if(action === 'add-todo'){
+      var txt = (form.elements.todoText.value || '').trim();
+      if(!txt) return;
+      ensureCalEntry(form.dataset.date).todos.push({ id: genId('todo'), text: txt, done: false, urgent: !!form.elements.todoUrgent.checked });
+      saveCalendar(); render();
+    }
+  });
+
+  app.addEventListener('focusout', function(e){
+    var a = e.target.dataset && e.target.dataset.action;
+    if(a === 'edit-message'){
+      var g = findGroup(e.target.dataset.id);
+      if(g){ g.message = e.target.value; saveGroups(); render(); }
+    }
+    else if(a === 'edit-quick-message'){ quickMessageDraft = e.target.value; render(); }
+    else if(a === 'edit-calendar-note'){
+      ensureCalEntry(e.target.dataset.date).note = e.target.value;
+      saveCalendar(); render();
+    }
+  });
+
+  app.addEventListener('change', function(e){
+    var t = e.target, a = t.dataset && t.dataset.action;
+    if(a === 'photo-input'){
+      var file = t.files && t.files[0];
+      if(!file) return;
+      var pid = t.dataset.id;
+      loadAndResizeImage(file).then(function(dataUrl){
+        var p = findPerson(pid);
+        if(p){ p.photo = dataUrl; savePeople(); render(); }
+      }).catch(function(){ showBanner("Couldn't load that photo. Try a different image."); });
+    }
+    else if(a === 'toggle-sent'){
+      var g = findGroup(t.dataset.id);
+      if(g){
+        var pId = t.dataset.person, idx = g.sentIds.indexOf(pId);
+        if(t.checked){ if(idx === -1) g.sentIds.push(pId); }
+        else { if(idx !== -1) g.sentIds.splice(idx, 1); g.completed = false; }
+        saveGroups(); render();
+      }
+    }
+    else if(a === 'edit-calendar-alarm'){
+      ensureCalEntry(t.dataset.date).alarm = t.value;
+      saveCalendar(); render();
+      if('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+      scheduleTodaysAlarms();
+    }
+    else if(a === 'toggle-todo-done'){
+      var r = findCalTodo(t.dataset.date, t.dataset.todo);
+      if(r){ r.todo.done = t.checked; saveCalendar(); render(); }
+    }
+  });
+
+  loadAll();
+  render();
+  scheduleTodaysAlarms();
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
